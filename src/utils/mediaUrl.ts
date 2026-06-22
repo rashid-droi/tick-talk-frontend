@@ -1,19 +1,34 @@
-/** Use same-origin /api/v1/media paths so Vite dev proxy (or nginx) can load images. */
-export function resolveMediaUrl(url: string | null | undefined): string {
-  if (!url?.trim()) return ''
+import { resolveApiBaseUrl } from '@/api/resolveBaseUrl'
+
+function extractMediaPath(url: string): string | null {
   const trimmed = url.trim()
-  try {
-    const parsed = new URL(trimmed, typeof window !== 'undefined' ? window.location.origin : undefined)
-    if (parsed.pathname.startsWith('/api/v1/media')) {
-      return `${parsed.pathname}${parsed.search}`
-    }
-  } catch {
-    /* fall through */
-  }
   if (trimmed.startsWith('/api/v1/media')) {
     return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
   }
   const match = trimmed.match(/\/api\/v1\/media\/[^\s?#]*/)
-  if (match) return match[0]
-  return trimmed
+  return match ? match[0] : null
+}
+
+/**
+ * Resolve selfie/media URLs for the current deployment.
+ * Dev: same-origin `/api/v1/media/...` (Vite proxy).
+ * Prod split host: `https://ticktalk-api.../api/v1/media/...` when VITE_API_BASE_URL is absolute.
+ */
+export function resolveMediaUrl(url: string | null | undefined): string {
+  if (!url?.trim()) return ''
+  const trimmed = url.trim()
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed
+  }
+
+  const mediaPath = extractMediaPath(trimmed)
+  if (!mediaPath) return trimmed
+
+  const apiBase = resolveApiBaseUrl()
+  if (apiBase.startsWith('http')) {
+    return `${new URL(apiBase).origin}${mediaPath}`
+  }
+
+  return mediaPath
 }
