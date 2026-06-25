@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BingoCardGrid from '@/components/participant/BingoCardGrid.vue'
 import BingoSelfieModal from '@/components/participant/BingoSelfieModal.vue'
+import GameInstructionsModal from '@/components/participant/GameInstructionsModal.vue'
 import EventModeBadge from '@/components/EventModeBadge.vue'
 import type { ParticipantTask } from '@/types'
 import { useEventMode } from '@/composables/useEventMode'
@@ -23,6 +24,7 @@ const error = ref('')
 const loading = ref(true)
 const bingoModalOpen = ref(false)
 const activeSelfieTask = ref<ParticipantTask | null>(null)
+const showInstructionsModal = ref(false)
 
 const eventMode = computed(() => eventStore.event?.mode)
 const showBingoUI = computed(() => isBingoEvent(tasksStore.tasks, eventMode.value))
@@ -66,10 +68,25 @@ onMounted(async () => {
       await tasksStore.fetchTasks()
     }
     if (showBingoUI.value) void prewarmCamera()
+
+    if (eventStore.event) {
+      const key = `hasSeenInstructions_${eventStore.event.id}`
+      if (!localStorage.getItem(key)) {
+        showInstructionsModal.value = true
+      }
+    }
   } finally {
     loading.value = false
   }
 })
+
+function closeInstructions() {
+  if (eventStore.event) {
+    const key = `hasSeenInstructions_${eventStore.event.id}`
+    localStorage.setItem(key, 'true')
+  }
+  showInstructionsModal.value = false
+}
 
 watch(showBingoUI, (bingo) => {
   if (bingo) void prewarmCamera()
@@ -149,7 +166,16 @@ async function onSelfieChallengeCompleted(payload: {
       class="flex items-center justify-between"
     >
       <h1 class="game-heading text-2xl">{{ pageTitle }}</h1>
-      <EventModeBadge />
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          class="flex items-center justify-center rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200"
+          @click="emit('open-leaderboard')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+        </button>
+        <EventModeBadge />
+      </div>
     </div>
 
     <p v-if="!showBingoUI" class="game-muted text-sm">
@@ -301,6 +327,13 @@ async function onSelfieChallengeCompleted(payload: {
       :task="activeSelfieTask"
       @close="closeSelfieModal"
       @completed="onSelfieChallengeCompleted"
+    />
+
+    <GameInstructionsModal
+      :open="showInstructionsModal"
+      :is-competition="isCompetition"
+      @close="closeInstructions"
+      @start="closeInstructions"
     />
   </div>
 </template>

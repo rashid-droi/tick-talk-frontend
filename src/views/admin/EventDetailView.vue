@@ -81,6 +81,14 @@ function onCopyError() {
             class="game-qr-image h-44 w-44 rounded-lg"
           />
           <QrDisplay v-else-if="ev.join_url" :payload="ev.join_url" :size="176" variant="gold" />
+          <a
+            v-if="ev.qr_code_data_url"
+            :href="ev.qr_code_data_url"
+            :download="`qr-${ev.code}.png`"
+            class="btn-secondary mt-4 text-sm px-4 py-2"
+          >
+            Download QR
+          </a>
         </div>
         <div class="space-y-3">
           <div v-if="ev.code">

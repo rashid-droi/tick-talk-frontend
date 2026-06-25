@@ -102,9 +102,7 @@ function getExpandedSlotIndex(): number {
   <div class="bingo-board tt-animate-fade-in">
     <!-- Top bar: Rank | Logo | You -->
     <div class="bingo-topbar">
-      <!-- Rank button -->
       <button
-        v-if="showLeaderboard"
         type="button"
         class="bingo-topbar-btn"
         @click="emit('nav-rank')"
@@ -117,9 +115,8 @@ function getExpandedSlotIndex(): number {
           <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
           <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
         </svg>
-        <span>Rank</span>
+        <span>{{ showLeaderboard ? 'Rank' : 'Players' }}</span>
       </button>
-      <div v-else class="bingo-topbar-spacer" />
 
       <!-- Centered Logo -->
       <div class="ticktalk-logo" aria-label="TickTalk">

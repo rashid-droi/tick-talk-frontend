@@ -30,15 +30,15 @@ onMounted(async () => {
   await tasksStore.fetchTasks(eventId.value)
 })
 
-function openCreate() {
-  editingTask.value = null
-  formOpen.value = true
-}
+// function openCreate() {
+//   editingTask.value = null
+//   formOpen.value = true
+// }
 
-function openEdit(task: EventTask) {
-  editingTask.value = task
-  formOpen.value = true
-}
+// function openEdit(task: EventTask) {
+//   editingTask.value = task
+//   formOpen.value = true
+// }
 
 function openSubmissions(task: EventTask) {
   submissionsTask.value = task
@@ -64,26 +64,26 @@ async function handleSave(payload: TaskCreatePayload) {
   }
 }
 
-async function handleDelete(task: EventTask) {
-  if (!confirm(`Delete "${task.title}"?`)) return
-  error.value = ''
-  try {
-    await tasksStore.deleteTask(eventId.value, task.id)
-    success.value = 'Task deleted'
-  } catch (e) {
-    error.value = getErrorMessage(e)
-  }
-}
+// async function handleDelete(task: EventTask) {
+//   if (!confirm(`Delete "${task.title}"?`)) return
+//   error.value = ''
+//   try {
+//     await tasksStore.deleteTask(eventId.value, task.id)
+//     success.value = 'Task deleted'
+//   } catch (e) {
+//     error.value = getErrorMessage(e)
+//   }
+// }
 
-async function move(taskId: number, direction: 'up' | 'down') {
-  const ids = tasksStore.moveTask(taskId, direction)
-  if (!ids) return
-  try {
-    await tasksStore.reorderTasks(eventId.value, ids)
-  } catch (e) {
-    error.value = getErrorMessage(e)
-  }
-}
+// async function move(taskId: number, direction: 'up' | 'down') {
+//   const ids = tasksStore.moveTask(taskId, direction)
+//   if (!ids) return
+//   try {
+//     await tasksStore.reorderTasks(eventId.value, ids)
+//   } catch (e) {
+//     error.value = getErrorMessage(e)
+//   }
+// }
 
 async function handleBulkImport(text: string) {
   error.value = ''
@@ -126,7 +126,7 @@ async function handleBulkImport(text: string) {
 
     <ul v-else class="space-y-3">
       <li
-        v-for="(task, index) in tasksStore.tasks"
+        v-for="task in tasksStore.tasks"
         :key="task.id"
         class="card flex gap-3"
       >
